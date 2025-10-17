@@ -1,0 +1,38 @@
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://taskplanner:password@db:5432/taskplanner
+      - SECRET_KEY=your-secret-key-change-in-production
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - ENVIRONMENT=development
+      - DEBUG=true
+    depends_on:
+      - db
+    volumes:
+      - ./app:/app/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=taskplanner
+      - POSTGRES_USER=taskplanner
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
